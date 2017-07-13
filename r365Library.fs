@@ -56,19 +56,39 @@ type Quiz={
 
 type Course={
         courseNumber:int;
-        name:string;
-        descrtiptoin:string;
+        name:String50;
+        description:string;
         icon:string;
         section:string;
         Lessones:Lesson list
+        quiz :Quiz
         status:CourseStatus
         }
 
 type Section={
-    name:string;
+    name:String50;
     Courses:Course list;
     appPath:string
     }
+
+type Navigation=Navigation of Section list
+let createString50 ( s:string )=
+    if s.Length<=50 then
+        Some (String50 s)
+    else
+        None
+let createUrlString (s:string)=
+   if  Regex.IsMatch(s,"/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)") then 
+    Some (UrlString s)
+   else
+    None
+let addNewSection navigation (section:Section)=
+    section::navigation
+let updateSection navigation ( updatedSection:Section ) name =
+    navigation|>List.map(fun s->if s.name=name then updatedSection else s)
+let deleteSection navigation name=
+    navigation|>List.filter(fun s->  s.name<>name)
+
 
 [<EntryPoint>]
 let main argv =
