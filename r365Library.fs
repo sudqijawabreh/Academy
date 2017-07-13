@@ -30,6 +30,7 @@ type CourseStatus=
 type QuizStatus=
     Pass
     |Fail
+    |Untaken
 type QuizQuestion={
     question:string;
         correctAnswer:CorrectAnswer;
@@ -95,7 +96,7 @@ let deleteSection name=deleteItem (fun s->s.name<>name)
 let addSection (section:Section)=addNewItem section
 
 let addCourse (course:Course)=addNewItem course
-let updateCourse ( course:Course )=updateItem(fun c->if course.name=c.name then course else c) course
+let updateCourse ( course:Course )=updateItem(fun (c:Course)->if course.name=c.name then course else c) course
 let deleteCourse name=deleteItem (fun (c:Course)->c.name<>name)
 
 let addLesson (lesson:Lesson)=addNewItem lesson
@@ -104,7 +105,7 @@ let deleteLesson name=deleteItem (fun (l:Lesson)->l.name<>name)
 
 
 let addQuestion (question:QuizQuestion)=addNewItem question
-let updateQuestion (quizQuestion:QuizQuestion)=updateItem(fun q->if quizQuestion.question=q.question then quizeQuestion else q) quizeQuestion
+let updateQuestion (quizQuestion:QuizQuestion)=updateItem(fun q->if quizQuestion.question=q.question then quizQuestion else q) quizQuestion
 let deleteQuestion questionString=deleteItem (fun (quizQuestion)->quizQuestion.question<>questionString)
 
 [<EntryPoint>]
