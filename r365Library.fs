@@ -31,11 +31,12 @@ type QuizStatus=
     Pass
     |Fail
 type QuizQuestion={
-        question:string;
+    question:string;
         correctAnswer:CorrectAnswer;
-        answers:Answers
+        answers:Answers;
         status:QuizStatus
-        }
+}
+        
 type Lesson={
         number:int;
         name:String50;
@@ -51,7 +52,7 @@ type Lesson={
 
 type Quiz={
         name:string;
-        quizeQuestions:QuizQuestion list
+        quizQuestions:QuizQuestion list
         }
 
 type Course={
@@ -82,13 +83,29 @@ let createUrlString (s:string)=
     Some (UrlString s)
    else
     None
-let addNewSection navigation (section:Section)=
-    section::navigation
-let updateSection navigation ( updatedSection:Section ) name =
-    navigation|>List.map(fun s->if s.name=name then updatedSection else s)
-let deleteSection navigation name=
-    navigation|>List.filter(fun s->  s.name<>name)
+let addNewItem item list =
+    item::list
+let updateItem f item list=
+    list|>List.map(f)
+let deleteItem f attrib list  =
+    list|>List.filter(f)
 
+let updateSection section=updateItem (fun s->if section.name=s.name then section else s) section
+let deleteSection name=deleteItem (fun s->s.name<>name)
+let addSection (section:Section)=addNewItem section
+
+let addCourse (course:Course)=addNewItem course
+let updateCourse ( course:Course )=updateItem(fun c->if course.name=c.name then course else c) course
+let deleteCourse name=deleteItem (fun (c:Course)->c.name<>name)
+
+let addLesson (lesson:Lesson)=addNewItem lesson
+let updateLesson (lesson:Lesson)=updateItem(fun l->if lesson.name=l.name then lesson else l) lesson
+let deleteLesson name=deleteItem (fun (l:Lesson)->l.name<>name)
+
+
+let addQuestion (question:QuizQuestion)=addNewItem question
+let updateQuestion (quizQuestion:QuizQuestion)=updateItem(fun q->if quizQuestion.question=q.question then quizeQuestion else q) quizeQuestion
+let deleteQuestion questionString=deleteItem (fun (quizQuestion)->quizQuestion.question<>questionString)
 
 [<EntryPoint>]
 let main argv =
