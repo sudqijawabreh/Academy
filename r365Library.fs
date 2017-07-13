@@ -1,5 +1,8 @@
 module r365Library
 open System
+open System.Text.RegularExpressions
+type String50=String50 of string
+type UrlString=UrlString of string
 type SecurityRole=
     ResturantManager
     |Schedular
@@ -35,10 +38,10 @@ type QuizQuestion={
         }
 type Lesson={
         number:int;
-        name:string;
-        descrtiptoin:string;
+        name:String50;
+        description:string;
         course:string;
-        dependentOn:string ;
+        dependentOn:Lesson ;
         contentUrl:string ;
         assginedSecurityRoles:SecurityRole list
         publishStatus:PublishStatus
