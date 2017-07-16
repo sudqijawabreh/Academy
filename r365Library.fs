@@ -35,7 +35,6 @@ type QuizQuestion={
     question:string;
         correctAnswer:CorrectAnswer;
         answers:Answers;
-        status:QuizStatus
 }
         
 type Lesson={
@@ -54,6 +53,7 @@ type Lesson={
 type Quiz={
         name:string;
         quizQuestions:QuizQuestion list
+        status:QuizStatus
         }
 
 type Course={
@@ -100,14 +100,16 @@ let updateCourse ( course:Course )=updateItem(fun (c:Course)->if course.name=c.n
 let deleteCourse name=deleteItem (fun (c:Course)->c.name<>name)
 
 let addLesson (lesson:Lesson)=addNewItem lesson
-let updateLesson (lesson:Lesson)=updateItem(fun l->if lesson.name=l.name then lesson else l) lesson
+let updateLesson (lesson:Lesson)=updateItem(fun (l:Lesson)->if lesson.name=l.name then lesson else l) lesson
 let deleteLesson name=deleteItem (fun (l:Lesson)->l.name<>name)
 
 
 let addQuestion (question:QuizQuestion)=addNewItem question
 let updateQuestion (quizQuestion:QuizQuestion)=updateItem(fun q->if quizQuestion.question=q.question then quizQuestion else q) quizQuestion
 let deleteQuestion questionString=deleteItem (fun (quizQuestion)->quizQuestion.question<>questionString)
-
+let answers= {Answers.answer1="1";answer2="2";answer3=None;answer4=None;answer5=None;answer6=None}
+let q1={question="hello";correctAnswer=Answer1;answers=answers}
+let quiz={name="quiz";Quiz.quizQuestions=[];status=Untaken}
 [<EntryPoint>]
 let main argv =
     printf "hello"
