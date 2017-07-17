@@ -9,18 +9,7 @@ let x=Option.get((createString50 "hello"))
 let coursename= Option.get((createString50 "course name"))
 let lessonname= Option.get((createString50 "lesson name"))
 
-let s={name=x;Courses=[];appPath=""}
-let c1={
-        courseNumber=1;
-        name=String50 "course 1";
-        description="description";
-        icon="icon";
-        section="section";
-        Lessones=[];
-        quiz=quiz1;
-        status=NotStarted
-
-        }
+let s={name=x;courses=[];appPath=""}
 let l1={
         number=1;
         name=String50 "lesson1 "
@@ -45,13 +34,32 @@ let l2={
         feature=Old;
         progress=LessonProgress.Completed;
 }
+let c1={
+        courseNumber=1;
+        name=String50 "course 1";
+        description="description";
+        icon="icon";
+        section="section";
+        lessons=[l1];
+        quiz=quiz1;
+        status=NotStarted
+
+        }
 let c2={
         courseNumber=1;
         name=coursename;
         description="description";
         icon="icon";
         section="section";
-        Lessones=[];
+        lessons=[];
         quiz=quiz1;
         status=NotStarted
         }
+// using functions
+let nav=[s]
+q1 |>addQuestionToQuiz quiz 
+let c1'=l1|>addLessonToCourse c1
+let c3=l2|>addLessonToCourse c1'
+l2|>addLessonToCourse c1'|>addCourseToSection s|>addSectionToNav nav
+c3.lessons|>List.iteri (fun i x -> printfn "%i- %s" ( i+1 ) ( x.name|>(fun (String50 y)->y ) ))
+

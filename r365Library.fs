@@ -1,7 +1,8 @@
 module r365Library
 open System
 open System.Text
-type String50=String50 of string
+type String50= String50 of string
+
 type UrlString=UrlString of string
 type SecurityRole=
     ResturantManager
@@ -92,6 +93,7 @@ let deleteItem f list  =
 let updateSection section=updateItem (fun s->if section.name=s.name then section else s) section
 let deleteSection name=deleteItem (fun s->s.name<>name)
 let addSection (section:Section)=addNewItem section
+let addSectionToNav s nav=addSection nav s
 
 let addCourse (course:Course)=addNewItem course
 let updateCourse ( course:Course )=updateItem(fun (c:Course)->if course.name=c.name then course else c) course
@@ -125,6 +127,8 @@ let deleteQuestionInQuiz quiz name=  deleteQuestion |>InQuiz quiz name
 let answers= {Answers.answer1="1";answer2="2";answer3=None;answer4=None;answer5=None;answer6=None}
 let q1={question="hello";correctAnswer=Answer1;answers=answers}
 let quiz={name="quiz";Quiz.quizQuestions=[];status=Untaken}
+
+
 [<EntryPoint>]
 let main argv =
     printf "hello"
