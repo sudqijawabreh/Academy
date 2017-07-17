@@ -1,6 +1,6 @@
 module r365Library
 open System
-open System.Text.RegularExpressions
+open System.Text
 type String50=String50 of string
 type UrlString=UrlString of string
 type SecurityRole=
@@ -42,7 +42,7 @@ type Lesson={
         name:String50;
         description:string;
         course:string;
-        dependentOn:Lesson ;
+        dependentOn:Lesson option ;
         contentUrl:string ;
         assginedSecurityRoles:SecurityRole list
         publishStatus:PublishStatus
@@ -62,7 +62,7 @@ type Course={
         description:string;
         icon:string;
         section:string;
-        Lessones:Lesson list
+        lessons:Lesson list
         quiz :Quiz
         status:CourseStatus
         }
@@ -80,15 +80,13 @@ let createString50 ( s:string )=
     else
         None
 let createUrlString (s:string)=
-   if  Regex.IsMatch(s,"/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)") then 
     Some (UrlString s)
-   else
-    None
+   //if  Regex.IsMatch(s,"/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)") then 
 let addNewItem item list =
     item::list
 let updateItem f item list=
     list|>List.map(f)
-let deleteItem f attrib list  =
+let deleteItem f list  =
     list|>List.filter(f)
 
 let updateSection section=updateItem (fun s->if section.name=s.name then section else s) section
@@ -99,9 +97,15 @@ let addCourse (course:Course)=addNewItem course
 let updateCourse ( course:Course )=updateItem(fun (c:Course)->if course.name=c.name then course else c) course
 let deleteCourse name=deleteItem (fun (c:Course)->c.name<>name)
 
-let addLesson (lesson:Lesson)=addNewItem lesson
+let addLesson (lesson:Lesson) =addNewItem lesson
 let updateLesson (lesson:Lesson)=updateItem(fun (l:Lesson)->if lesson.name=l.name then lesson else l) lesson
 let deleteLesson name=deleteItem (fun (l:Lesson)->l.name<>name)
+let toCourse l c f={c with lessons=c.lessons|>f l}
+let inCourse =toCourse
+let addLessonToCourse l c =addLesson |>toCourse l c 
+let updateLessonInCourse l c=updateLesson |>inCourse l c
+let deleteLessonInCourse name c=deleteLesson |>inCourse name c
+
 
 
 let addQuestion (question:QuizQuestion)=addNewItem question
