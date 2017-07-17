@@ -128,8 +128,14 @@ let answers= {Answers.answer1="1";answer2="2";answer3=None;answer4=None;answer5=
 let q1={question="hello";correctAnswer=Answer1;answers=answers}
 let quiz={name="quiz";Quiz.quizQuestions=[];status=Untaken}
 
+let printSections sections=
+    sections
+    |>List.map(fun x->match x.name with String50 y->y)
+    |>List.iteri (fun i x-> printfn "%i-%s" i x )
+
 
 [<EntryPoint>]
 let main argv =
     printf "hello"
     0 // return an integer exit code
+
