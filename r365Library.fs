@@ -69,7 +69,7 @@ type Course={
 
 type Section={
     name:String50;
-    Courses:Course list;
+    courses:Course list;
     appPath:string
     }
 
@@ -96,21 +96,32 @@ let addSection (section:Section)=addNewItem section
 let addCourse (course:Course)=addNewItem course
 let updateCourse ( course:Course )=updateItem(fun (c:Course)->if course.name=c.name then course else c) course
 let deleteCourse name=deleteItem (fun (c:Course)->c.name<>name)
+let toSection  s c f={s with courses=s.courses|>f c}
+let InSection=toSection
+let addCourseToSection s c =addCourse|> toSection s c
+let updateCourseInSection s c =updateCourse |>InSection s c
+let deleteCourseInSection s name=deleteCourse |>InSection s name
+
 
 let addLesson (lesson:Lesson) =addNewItem lesson
 let updateLesson (lesson:Lesson)=updateItem(fun (l:Lesson)->if lesson.name=l.name then lesson else l) lesson
 let deleteLesson name=deleteItem (fun (l:Lesson)->l.name<>name)
-let toCourse l c f={c with lessons=c.lessons|>f l}
+let toCourse c  l f={c with lessons=c.lessons|>f l}
 let inCourse =toCourse
-let addLessonToCourse l c =addLesson |>toCourse l c 
-let updateLessonInCourse l c=updateLesson |>inCourse l c
-let deleteLessonInCourse name c=deleteLesson |>inCourse name c
+let addLessonToCourse c  l =addLesson |>toCourse c  l 
+let updateLessonInCourse c  l=updateLesson |>inCourse c  l
+let deleteLessonInCourse  c name=deleteLesson |>inCourse  c name
 
 
 
 let addQuestion (question:QuizQuestion)=addNewItem question
 let updateQuestion (quizQuestion:QuizQuestion)=updateItem(fun q->if quizQuestion.question=q.question then quizQuestion else q) quizQuestion
 let deleteQuestion questionString=deleteItem (fun (quizQuestion)->quizQuestion.question<>questionString)
+let toQuiz quiz question f={quiz with quizQuestions=quiz.quizQuestions|> f question}
+let InQuiz=toQuiz
+let addQuestionToQuiz  quiz question=  addQuestion |>toQuiz quiz question
+let updateQuestionInQuiz quiz question=  updateQuestion |>InQuiz quiz question
+let deleteQuestionInQuiz quiz name=  deleteQuestion |>InQuiz quiz name
 let answers= {Answers.answer1="1";answer2="2";answer3=None;answer4=None;answer5=None;answer6=None}
 let q1={question="hello";correctAnswer=Answer1;answers=answers}
 let quiz={name="quiz";Quiz.quizQuestions=[];status=Untaken}
