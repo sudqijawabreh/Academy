@@ -295,16 +295,43 @@ let rec navMenu nav :Section list=
         |>deleteSectionInNav nav
         |>navMenu
     |"b"->nav
- 
+let menu (collection:'a list) printCollection elementMenu update delete add read=
+    let rec inside ()=
+        Console.Clear()
+        printCollection collection
+        printOptions()
+        match Console.ReadLine() with 
+        "u"->
+            printf "enter number: "
+            Console.ReadLine()
+            |>int
+            |>(fun x->elementMenu collection.[x])
+            |>update collection
+            |>inside
+        |"a"->
+            printfn "u"
+            read()
+            |>add collection
+            |>inside
+        |"d"->
+            Console.ReadLine() 
+            |>int 
+            |>(fun x ->collection.[x])
+            |>delete collection
+            |>inside
+        |"b"->collection
+    inside()
+let rec elementMenu element printElement nextMenu i=
+    let choice=sprintf "%i" i
+    let rec inside e= 
+        Console.Clear()
+        printElement e
+        printfn "enter number or (b) to go back : "
+        match Console.ReadLine() with 
+        choice-> inside ( nextMenu element )
+        |"b"->e
+    inside element
     
-    
-    
-
-let answers= {Answers.answer1="1";answer2="2";answer3=None;answer4=None;answer5=None;answer6=None}
-let q1={question="hello";correctAnswer=Answer1;answers=answers}
-let quiz={name="quiz";Quiz.quizQuestions=[];status=Untaken}
-
-
 [<EntryPoint>]
 let main argv =
     printf "hello"
