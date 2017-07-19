@@ -2,7 +2,14 @@ module r365Library
 open System
 open System.Text
 type String50= String50 of string
-
+type ListIndex= ListIndex of int
+let string50Value s=match s with String50 x ->x
+let createListIndex length index=
+    printfn "%i" index
+    if index<length then
+        ListIndex ( index )|>Some
+    else
+        None
 type UrlString=UrlString of string
 type SecurityRole=
     ResturantManager
@@ -42,7 +49,7 @@ type Lesson={
         number:int;
         name:String50;
         description:string;
-        course:string;
+        course:String50;
         dependentOn:Lesson option ;
         contentUrl:string ;
         assginedSecurityRoles:SecurityRole list
@@ -62,9 +69,9 @@ type Course={
         name:String50;
         description:string;
         icon:string;
-        section:string;
+        section:String50;
         lessons:Lesson list
-        quiz :Quiz
+
         status:CourseStatus
         }
 
@@ -89,11 +96,12 @@ let updateItem f item list=
     list|>List.map(f)
 let deleteItem f list  =
     list|>List.filter(f)
-
 let updateSection section=updateItem (fun s->if section.name=s.name then section else s) section
-let deleteSection name=deleteItem (fun s->s.name<>name)
+let deleteSection section=deleteItem (fun s->s<>section)
 let addSection (section:Section)=addNewItem section
-let addSectionToNav s nav=addSection nav s
+let addSectionToNav nav s=addSection s nav
+let updateSectionInNav nav s=updateSection s nav
+let deleteSectionInNav nav s=deleteSection s nav
 
 let addCourse (course:Course)=addNewItem course
 let updateCourse ( course:Course )=updateItem(fun (c:Course)->if course.name=c.name then course else c) course
@@ -124,14 +132,177 @@ let InQuiz=toQuiz
 let addQuestionToQuiz  quiz question=  addQuestion |>toQuiz quiz question
 let updateQuestionInQuiz quiz question=  updateQuestion |>InQuiz quiz question
 let deleteQuestionInQuiz quiz name=  deleteQuestion |>InQuiz quiz name
+
+let printSections f sections=
+    sections
+    |>List.map(f)
+    |>List.iteri (fun i x-> printfn "%i-%s" i x )
+let another =printSections (fun x->match x.name with String50 y->y)
+let inputSection ()=
+    Console.Clear()
+    printfn "enter name: "
+    let name=Console.ReadLine()
+    printfn "path :"
+    let appPath=Console.ReadLine()
+    {name=String50 name;appPath=appPath;courses=[]}
+let inputCourse section=
+    Console.Clear()
+    printfn "Course name:"
+    let name=Console.ReadLine()
+    printfn "Course number:"
+    let number=Console.ReadLine()|>int
+    printfn "Course Description:"
+    let ds=Console.ReadLine()
+    printfn "Course Icon:"
+    let icon=Console.ReadLine()
+    {name=(String50 name);courseNumber=number;description=ds;icon=icon;section=section;lessons=[];status=CourseStatus.NotStarted}
+let printSection section=
+    let (String50 name)=section.name
+    printfn" 1- %s"  name
+    printfn" 2- %s" section.appPath
+    printfn" 3- courses"
+let printOptions ()=
+    printf "(a)dd\t"
+    printf "(d)elete\t"
+    printf "(u)pdate\t"
+    printfn "(b)ack"
+let printCourse course=
+    printfn "1- Course number: %i" course.courseNumber
+    printfn "2- Course Name : %s" (course.name|>string50Value)
+    printfn "3- Course Description: %s" course.description
+    printfn "4- Course icon : %s" course.icon
+    printfn "5- Course section: %s" ( course.section|>string50Value )
+    printfn "6- lessons"
+let inputLesson course =
+    Console.Clear()
+    printfn "Lesson name:"
+    let name=Console.ReadLine()
+    printfn "Lesson number:"
+    let number=Console.ReadLine()|>int
+    printfn "Lesson Description:"
+    let ds=Console.ReadLine()
+    printfn "Lesson conentUrl:"
+    let url=Console.ReadLine()
+    {name=(String50 name);
+    number=number;
+    description=ds;
+    course=course;
+    dependentOn=None;
+    contentUrl=url;
+    assginedSecurityRoles=[];
+    publishStatus=UnPublished;
+    feature=Old;
+    progress=UnCompleted;
+    }
+let printLesson lesson=
+    printfn "1- Lesson number: %i" lesson.number
+    printfn "2- Lesson Name : %s" (lesson.name|>string50Value)
+    printfn "3- Lesson Description: %s" lesson.description
+    printfn "4- Lesson course: %s" (lesson.course|>string50Value)
+    printfn "5- contetn url: %s" (lesson.contentUrl)
+
+
+let lessonMenu lesson=
+    Console.Clear()
+    printLesson lesson
+    lesson
+
+
+let lessonsMenu course =
+    Console.Clear()
+    printSections(fun (x:Lesson)->string50Value x.name) course.lessons
+    printOptions ()
+    match Console.ReadLine() with 
+        "u"->
+            printf "enter number: "
+            Console.ReadLine()
+            |>int
+            |>(fun x->course.lessons.[x])
+            |>lessonMenu 
+            |>updateLessonInCourse course
+            
+        |"a"->
+            inputLesson course.name
+            |>addLessonToCourse course 
+        |"d"->
+            Console.ReadLine() 
+            |>int 
+            |>(fun x ->course.lessons.[x].name)
+            |>deleteLessonInCourse course
+        |"b"->course
+let courseMenu course=
+    Console.Clear()
+    printCourse course
+    match Console.ReadLine() with 
+    "6"-> lessonsMenu course
+    |"b"->course
+
+let CoursesMenu section=
+    Console.Clear()
+    printSections(fun ( x:Course )->match x.name with String50 y->y ) section.courses
+    printOptions ()
+    match Console.ReadLine() with 
+        "u"->
+            printf "enter number: "
+            Console.ReadLine()
+            |>int
+            |>(fun x->section.courses.[x])
+            |>courseMenu 
+            |>updateCourseInSection section
+            
+        |"a"->
+            inputCourse section.name
+            |>addCourseToSection section 
+        |"d"->
+            Console.ReadLine() 
+            |>int 
+            |>(fun x ->section.courses.[x].name)
+            |>deleteCourseInSection section
+        |"b"->section
+
+let rec sectionMenu section =
+    Console.Clear()
+    printSection section
+    printfn "enter number or (b) to go back : "
+    let ( String50 sectionName)=section.name
+    match Console.ReadLine() with 
+    "3"-> sectionMenu ( CoursesMenu section )
+    |"b"->section
+    
+    
+    //printSections(fun ( x:Course )->match x.name with String50 y->y ) section.courses
+let rec navMenu nav :Section list=
+    Console.Clear()
+    another nav
+    printOptions()
+    match Console.ReadLine() with 
+    "u"->
+        printf "enter number: "
+        Console.ReadLine()
+        |>int
+        |>(fun x->sectionMenu nav.[x])
+        |>updateSectionInNav nav
+        |>navMenu
+    |"a"->
+        printfn "u"
+        inputSection()
+        |>addSectionToNav nav
+        |>navMenu
+    |"d"->
+        Console.ReadLine() 
+        |>int 
+        |>(fun x ->nav.[x])
+        |>deleteSectionInNav nav
+        |>navMenu
+    |"b"->nav
+ 
+    
+    
+    
+
 let answers= {Answers.answer1="1";answer2="2";answer3=None;answer4=None;answer5=None;answer6=None}
 let q1={question="hello";correctAnswer=Answer1;answers=answers}
 let quiz={name="quiz";Quiz.quizQuestions=[];status=Untaken}
-
-let printSections sections=
-    sections
-    |>List.map(fun x->match x.name with String50 y->y)
-    |>List.iteri (fun i x-> printfn "%i-%s" i x )
 
 
 [<EntryPoint>]
