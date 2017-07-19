@@ -1,15 +1,27 @@
 module r365Library
 open System
 open System.Text
+let OptionFoldPrint f message defualt a=
+    match a with 
+    Some x-> f x
+    |None-> 
+        printfn message
+        defualt
+
 type String50= String50 of string
 type ListIndex= ListIndex of int
 let string50Value s=match s with String50 x ->x
 let createListIndex length index=
-    printfn "%i" index
-    if index<length then
-        ListIndex ( index )|>Some
-    else
-        None
+    let x=
+        try
+            index|>int|>Some
+        with
+        |_->None 
+    
+    match x with 
+    Some y when y<length && y>=0-> y|>ListIndex|>Some
+    |None->None
+
 type UrlString=UrlString of string
 type SecurityRole=
     ResturantManager
@@ -133,11 +145,10 @@ let addQuestionToQuiz  quiz question=  addQuestion |>toQuiz quiz question
 let updateQuestionInQuiz quiz question=  updateQuestion |>InQuiz quiz question
 let deleteQuestionInQuiz quiz name=  deleteQuestion |>InQuiz quiz name
 
-let printSections f sections=
-    sections
+let printList f l=
+    l
     |>List.map(f)
     |>List.iteri (fun i x-> printfn "%i-%s" i x )
-let another =printSections (fun x->match x.name with String50 y->y)
 let inputSection ()=
     Console.Clear()
     printfn "enter name: "
@@ -210,7 +221,7 @@ let lessonMenu lesson=
 
 let lessonsMenu course =
     Console.Clear()
-    printSections(fun (x:Lesson)->string50Value x.name) course.lessons
+    printList(fun (x:Lesson)->string50Value x.name) course.lessons
     printOptions ()
     match Console.ReadLine() with 
         "u"->
@@ -239,7 +250,7 @@ let courseMenu course=
 
 let CoursesMenu section=
     Console.Clear()
-    printSections(fun ( x:Course )->match x.name with String50 y->y ) section.courses
+    printList(fun ( x:Course )->match x.name with String50 y->y ) section.courses
     printOptions ()
     match Console.ReadLine() with 
         "u"->
@@ -271,7 +282,7 @@ let rec sectionMenu section =
     
     
     //printSections(fun ( x:Course )->match x.name with String50 y->y ) section.courses
-let rec navMenu (Some nav)=
+let rec navMenu ( nav:Section list )=
     Console.Clear()
     another nav
     printOptions()
@@ -279,27 +290,27 @@ let rec navMenu (Some nav)=
     "u"->
         printf "enter number: "
         Console.ReadLine()
-        |>int
         |>createListIndex nav.Length
         |>Option.map (fun ( ListIndex x )->sectionMenu nav.[x])
-        |>Option.map (updateSectionInNav nav)
+        |>OptionFoldPrint (updateSectionInNav nav) "invalid number" nav
         |>navMenu
     |"a"->
         printfn "u"
         inputSection()
         |>addSectionToNav nav
-        |>Some
         |>navMenu
     |"d"->
         Console.ReadLine() 
         |>int 
         |>(fun x ->nav.[x])
         |>deleteSectionInNav nav
-        |>Some
         |>navMenu
     |"b"->nav
-let menu (collection:'a list) printCollection elementMenu update delete add read=
-    let rec inside (Some (collection:'a list))=
+    |_->
+        printfn "Error" 
+        (navMenu nav)
+let menu printCollection elementMenu update delete add read elementN collection =
+    let rec inside collection=
         Console.Clear()
         printCollection collection
         printOptions()
@@ -307,26 +318,23 @@ let menu (collection:'a list) printCollection elementMenu update delete add read
         "u"->
             printf "enter number: "
             Console.ReadLine()
-            |>int
             |>createListIndex collection.Length
-            |>Option.map(fun (ListIndex x )->elementMenu collection.[x])
-            |>Option.map(update collection)
+            |>Option.map(fun (ListIndex x )->elementN collection x)
+            |>OptionFoldPrint(update collection) "invalid number " collection
             |>inside
         |"a"->
-            printfn "u"
             read()
             |>add collection
-            |>Some
             |>inside
         |"d"->
             Console.ReadLine() 
             |>int 
-            |>(fun x ->collection.[x])
+            |>elementN collection 
             |>delete collection
-            |>Some
             |>inside
         |"b"->collection
-    inside (Some collection)
+        
+    inside collection
 let rec elementMenu element printElement nextMenu i=
     let choice=sprintf "%i" i
     let rec inside e= 
@@ -337,9 +345,14 @@ let rec elementMenu element printElement nextMenu i=
         choice-> inside ( nextMenu element )
         |"b"->e
     inside element
-    
+
+let printSections =printList (fun x->match x.name with String50 y->y)
+let printCourses = printList (fun ( x:Course )->match x.name with String50 y->y)
+let printLessons =printList (fun ( x:Lesson )->match x.name with String50 y->y)
+let vMenu=menu printSections sectionMenu updateSectionInNav deleteSectionInNav addSectionToNav inputSection (fun y x->y.[x])
+
+
 [<EntryPoint>]
 let main argv =
     printf "hello"
     0 // return an integer exit code
-

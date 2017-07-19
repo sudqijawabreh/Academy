@@ -59,5 +59,4 @@ let s1={name=String50 "s1";appPath="path1";courses=[]}
 let s2={name=String50 "s2";appPath="path2";courses=[]}
 let s3={name=String50 "s3";appPath="path3";courses=[]}
 let ls=[s1;s2;s3]
-navMenu ls
-
+vMenu ls
