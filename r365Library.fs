@@ -271,7 +271,7 @@ let rec sectionMenu section =
     
     
     //printSections(fun ( x:Course )->match x.name with String50 y->y ) section.courses
-let rec navMenu nav :Section list=
+let rec navMenu (Some nav)=
     Console.Clear()
     another nav
     printOptions()
@@ -280,23 +280,26 @@ let rec navMenu nav :Section list=
         printf "enter number: "
         Console.ReadLine()
         |>int
-        |>(fun x->sectionMenu nav.[x])
-        |>updateSectionInNav nav
+        |>createListIndex nav.Length
+        |>Option.map (fun ( ListIndex x )->sectionMenu nav.[x])
+        |>Option.map (updateSectionInNav nav)
         |>navMenu
     |"a"->
         printfn "u"
         inputSection()
         |>addSectionToNav nav
+        |>Some
         |>navMenu
     |"d"->
         Console.ReadLine() 
         |>int 
         |>(fun x ->nav.[x])
         |>deleteSectionInNav nav
+        |>Some
         |>navMenu
     |"b"->nav
 let menu (collection:'a list) printCollection elementMenu update delete add read=
-    let rec inside ()=
+    let rec inside (Some (collection:'a list))=
         Console.Clear()
         printCollection collection
         printOptions()
@@ -305,22 +308,25 @@ let menu (collection:'a list) printCollection elementMenu update delete add read
             printf "enter number: "
             Console.ReadLine()
             |>int
-            |>(fun x->elementMenu collection.[x])
-            |>update collection
+            |>createListIndex collection.Length
+            |>Option.map(fun (ListIndex x )->elementMenu collection.[x])
+            |>Option.map(update collection)
             |>inside
         |"a"->
             printfn "u"
             read()
             |>add collection
+            |>Some
             |>inside
         |"d"->
             Console.ReadLine() 
             |>int 
             |>(fun x ->collection.[x])
             |>delete collection
+            |>Some
             |>inside
         |"b"->collection
-    inside()
+    inside (Some collection)
 let rec elementMenu element printElement nextMenu i=
     let choice=sprintf "%i" i
     let rec inside e= 
