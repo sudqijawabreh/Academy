@@ -348,8 +348,10 @@ let rec elementMenu  printElement i nextMenu  ( element:'a )=
         let c= Console.ReadLine()
         if c=choice then
             inside (nextMenu element)
-        else 
-            match c with 
+        else if(c="b") then
+            element
+        else
+            inside element
         
     inside element
 
