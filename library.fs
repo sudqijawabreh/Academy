@@ -166,6 +166,24 @@ type DomainMessage=
     |LessonNumberMustBeInteger
     |ElementIndexMustBePositive
     |ElementIndexMustBeInRange
+    |ElementIndexMustBeInteger
+
+let mapErrorToMessage =function
+    |CourseNameMustNotBeMoreThan10Chars->"Course Name Must Not Be More Than 10 Chars"
+    |SectionNameMustNotBeMoreThan10Chars->"Section Name Must Not Be More Than 10 Chars"
+    |LessonNameMustNotBeMoreThan10Chars->"Lesson Name Must Not Be More Than 10 Chars"
+    |NotValidUrl->"Invalid Url"
+    |CourseNumberMustBeInteger->"Course Number Must be Integer"
+    |LessonNumberMustBeInteger->"Lesson Number Must be Integer"
+    |ElementIndexMustBePositive->"Index Must Be Positive"
+    |ElementIndexMustBeInRange->"Index Must be in range"
+    |ElementIndexMustBeInteger->"index must be integer"
+let errorsToMessage errors=
+    errors|>List.map(mapErrorToMessage)|>List.reduce(fun acc x->acc+" "+x)
+let eitherSuccessOrOrigianl original result =
+    match result with
+    |Success (s,_)->s,[]
+    |Failure f->original,f
 let nameErrorMap error name =
     let map =function
     |StringError.MustNotBeLongerThan _ ->error
@@ -184,10 +202,11 @@ let createNumber error number =
     parseInt number|>mapMessagesR map
 let createCourseNumber =createNumber CourseNumberMustBeInteger
 let createLessonNumber =createNumber CourseNumberMustBeInteger
-let createElementIndex index length=
+let createElementIndex  length index=
     let map=function
     |ListIndexError.MustbeLessThan length->ElementIndexMustBeInRange
     |ListIndexError.MustbePositive->ElementIndexMustBePositive
+    |ListIndexError.NotAnInteger->ElementIndexMustBeInteger
     ListIndex.create length index|>mapMessagesR map
 let inputSection _=
     Console.Clear()
@@ -339,8 +358,9 @@ let rec navMenu ( nav:Section list )=
         printfn "Error"
         (navMenu nav)
 let menu printCollection elementMenu update delete add read getCollection record =
-    let rec inside record =
+    let rec inside  record msg =
         Console.Clear()
+        printfn "%s" msg
         let ( collection:'a list )=getCollection record
         printCollection collection
         printOptions()
@@ -349,24 +369,29 @@ let menu printCollection elementMenu update delete add read getCollection record
             printf "enter number: "
             Console.ReadLine()
             |>createElementIndex collection.Length
-            |>Option.map(fun (ListIndex x )->elementMenu collection.[x])
-            |>OptionFoldPrint(update record) record
-            |>inside
+            |>liftR ListIndex.value
+            |>liftR (fun x -> elementMenu collection.[x])
+            |>liftR (update record)
+            |>eitherSuccessOrOrigianl record 
+            |>(fun (x,y)->y|>errorsToMessage|>inside x)
         |"a"->
             record
             |>read
-            |>OptionFoldPrint(add record) record
-            |>inside
+            |>liftR(add record)
+            |>eitherSuccessOrOrigianl record
+            |>(fun (x,y)->y|>errorsToMessage|>inside x)
         |"d"->
             Console.ReadLine()
-            |>createListIndex collection.Length
-            |>Option.map(fun (ListIndex x )->collection.[x])
-            |>OptionFoldPrint(delete record) record
-            |>inside
+            |>createElementIndex collection.Length
+            |>liftR ListIndex.value
+            |>liftR (fun x -> elementMenu collection.[x])
+            |>liftR (update record)
+            |>eitherSuccessOrOrigianl record 
+            |>(fun (x,y)->y|>errorsToMessage|>inside x)
         |"b"->record
-        |_->inside record
+        |_->inside record "wrong input"
 
-    inside record
+    inside record ""
 let rec elementMenu  printElement i nextMenu  ( element:'a )=
     let choice=sprintf "%i" i
     let rec inside ( element:'a ) :'a=

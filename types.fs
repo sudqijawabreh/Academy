@@ -6,6 +6,7 @@ type StringError=
 type ListIndexError=
 |MustbePositive
 |MustbeLessThan of int
+|NotAnInteger
 type IntError=
 |NotAnInteger
 type UrlError=
@@ -25,12 +26,18 @@ let parseInt (s:string)=
     |_->fail NotAnInteger
 module ListIndex=
     type T= ListIndex of int
-    let create length index=
+    let createIndex length index=
 
         match index with
         |_ when index<0 -> fail MustbePositive
         |_ when index>length -> fail ( MustbeLessThan length )
         |_-> succeed (ListIndex index)
+    let create length index=
+        match index |>parseInt with
+        |Success(x,_)-> createIndex length x 
+        |Failure _->fail ListIndexError.NotAnInteger
+    let value (ListIndex index )=index
+
 
 module UrlString=
     let regString="(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})"

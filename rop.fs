@@ -97,7 +97,10 @@ let successTee f result =
         Success (x,msgs) 
     let fFailure errs = Failure errs 
     either fSuccess fFailure result
-
+let successOrPass f result=
+    match resutl with
+    |Success(s,_)->f s
+    |Failure f->result
 /// given an RopResult, call a unit function on the failure branch
 /// and pass thru the result
 let failureTee f result = 
