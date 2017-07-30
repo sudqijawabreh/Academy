@@ -358,6 +358,16 @@ let lessonMenu lesson=
 //         printfn "Error"
 //         (navMenu nav)
 let menu printCollection elementMenu update delete add read getCollection record =
+    let opOnElement op =
+            printf "enter number: "
+            Console.ReadLine()
+            |>createElementIndex collection.Length
+            |>liftR ListIndex.value
+            |>liftR (fun x -> elementMenu collection.[x])
+            |>liftR (op record)
+            |>eitherSuccessOrOrigianl record 
+            |>(fun (x,y)->y|>errorsToMessage|>inside x)
+
     let rec inside  record msg =
         Console.Clear()
         printfn "%s" msg
@@ -366,14 +376,7 @@ let menu printCollection elementMenu update delete add read getCollection record
         printOptions()
         match Console.ReadLine() with
         "u"->
-            printf "enter number: "
-            Console.ReadLine()
-            |>createElementIndex collection.Length
-            |>liftR ListIndex.value
-            |>liftR (fun x -> elementMenu collection.[x])
-            |>liftR (update record)
-            |>eitherSuccessOrOrigianl record 
-            |>(fun (x,y)->y|>errorsToMessage|>inside x)
+            opOnElement update
         |"a"->
             record
             |>read
@@ -381,13 +384,7 @@ let menu printCollection elementMenu update delete add read getCollection record
             |>eitherSuccessOrOrigianl record
             |>(fun (x,y)->y|>errorsToMessage|>inside x)
         |"d"->
-            Console.ReadLine()
-            |>createElementIndex collection.Length
-            |>liftR ListIndex.value
-            |>liftR (fun x -> elementMenu collection.[x])
-            |>liftR (delete record)
-            |>eitherSuccessOrOrigianl record 
-            |>(fun (x,y)->y|>errorsToMessage|>inside x)
+            opOnElement delete
         |"b"->record
         |_->inside record "wrong input"
 

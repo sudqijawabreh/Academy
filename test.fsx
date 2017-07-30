@@ -53,6 +53,8 @@ let c2={
         lessons=[];
         status=NotStarted
         }
+#load "types.fs"
+#load "rop.fs"
 #load "library.fs"
 open Library
 // let s1={name="s1";appPath="path1";courses=[]}
