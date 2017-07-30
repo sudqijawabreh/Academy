@@ -53,10 +53,10 @@ let c2={
         lessons=[];
         status=NotStarted
         }
-#load "r365Library.fs"
-open r365Library
-let s1={name=String50 "s1";appPath="path1";courses=[]}
-let s2={name=String50 "s2";appPath="path2";courses=[]}
-let s3={name=String50 "s3";appPath="path3";courses=[]}
-let ls=[s1;s2;s3]
-vMenu ls
+#load "library.fs"
+open Library
+// let s1={name="s1";appPath="path1";courses=[]}
+// let s2={name=String50 "s2";appPath="path2";courses=[]}
+// let s3={name=String50 "s3";appPath="path3";courses=[]}
+// let ls=[s1;s2;s3]
+vMenu []

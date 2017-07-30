@@ -30,7 +30,7 @@ module ListIndex=
 
         match index with
         |_ when index<0 -> fail MustbePositive
-        |_ when index>length -> fail ( MustbeLessThan length )
+        |_ when index>=length -> fail ( MustbeLessThan length )
         |_-> succeed (ListIndex index)
     let create length index=
         match index |>parseInt with
